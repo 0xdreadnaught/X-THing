@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    async function performSearch(searchQuery, languages, page = 1) {
+    async function performSearch(searchQuery, languages, sourceLanguage, page = 1) {
         try {
             const response = await fetch('/search', {
                 method: 'POST',
@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: JSON.stringify({
                     q: searchQuery,
                     languages: languages,
+                    source_language: sourceLanguage, // Pass the source language
                     page: page
                 })
             });
@@ -163,6 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const searchQuery = document.getElementById('searchQuery').value.trim();
         const selectedLanguages = Array.from(document.querySelectorAll('#languageOptions input:checked'))
             .map(checkbox => checkbox.value);
+        const sourceLanguage = document.getElementById('sourceLanguage').value; // Get source language from dropdown
 
         if (searchQuery === '') {
             return;
@@ -172,15 +174,19 @@ document.addEventListener('DOMContentLoaded', function () {
         currentLanguages = selectedLanguages;
         currentPage = 1;
 
-        // Fetch translations for each selected language
+        // Fetch translations for each selected language, but only if sourceLanguage and targetLang differ
         translations = await Promise.all(
             selectedLanguages.map(async lang => {
-                const translated = await translateSearchQuery(searchQuery, lang);
-                return { lang: lang, translated: translated };
+                if (lang !== sourceLanguage) { // Only translate if source and target differ
+                    const translated = await translateSearchQuery(searchQuery, lang);
+                    return { lang: lang, translated: translated };
+                } else {
+                    return { lang: lang, translated: searchQuery }; // No translation needed
+                }
             })
         );
 
-        await performSearch(searchQuery, selectedLanguages);
+        await performSearch(searchQuery, selectedLanguages, sourceLanguage);
     });
 
     async function translateSearchQuery(query, targetLang) {

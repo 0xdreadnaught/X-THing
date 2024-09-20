@@ -2,9 +2,7 @@ import asyncio
 import json
 from quart import Quart, render_template, request, jsonify
 from telethon import TelegramClient, types
-from telethon.tl.functions.messages import SearchRequest
 from telethon.tl.types import InputMessagesFilterEmpty
-from telethon import types
 import os
 from deep_translator import GoogleTranslator
 import logging
@@ -14,11 +12,9 @@ app = Quart(__name__)
 # Set logging level to WARNING or ERROR to avoid sensitive debug/info logs
 logging.basicConfig(level=logging.WARNING)
 
-# If you're specifically debugging Quart, you can also suppress specific logger
 log = logging.getLogger('quart.app')
 log.setLevel(logging.WARNING)
 
-# If you want to suppress other specific loggers like Hypercorn or Telethon, you can add:
 logging.getLogger('hypercorn').setLevel(logging.WARNING)
 logging.getLogger('telethon').setLevel(logging.WARNING)
 
@@ -62,19 +58,21 @@ class TelegramClientContext:
             print("Telegram client closed.")
 
 # Function to translate text using GoogleTranslator from deep_translator
-def translate_text(text, target_language):
+def translate_text(text, source_language, target_language):
     try:
         target_language = map_language_code(target_language)  # Ensure correct language code
-        translator = GoogleTranslator(source='auto', target=target_language)
-        
-        # Print translation progress
-        print(f"Translating '{text}' to {display_language_code(target_language)}...")
-        
+        source_language = map_language_code(source_language)  # Map the source language
+
+        # Skip translation if source and target languages match
+        if source_language == target_language:
+            print(f"Skipping translation: Source and target languages are the same ({display_language_code(target_language)}).")
+            return text
+
+        # Proceed with translation if languages differ
+        translator = GoogleTranslator(source=source_language, target=target_language)
         translated_text = translator.translate(text)
-        
-        # Print the result of the translation
+
         print(f"Translation complete: '{text}' to {display_language_code(target_language)}: {translated_text}")
-        
         return translated_text
     except Exception as e:
         print(f"Translation error: {str(e)}")
@@ -125,13 +123,12 @@ async def perform_search(client, search_query, limit=50):
                         sender_info['title'] = message.sender.username if message.sender else 'Unknown'
                 except Exception as sender_error:
                     print(f"Error getting sender info: {str(sender_error)}")
-                    # If we can't get the sender, try to use the chat title as a fallback
                     try:
                         if message.chat:
                             sender_info['title'] = message.chat.title or 'Unknown Chat'
                             sender_info['type'] = 'Chat'
                     except:
-                        pass  # If this also fails, we'll stick with the 'Unknown' default
+                        pass
 
                 urls = []
                 if message.entities:
@@ -153,7 +150,6 @@ async def perform_search(client, search_query, limit=50):
                         }
                         attached_files.append(media_info)
 
-                # Check if message is a forwarded message
                 forward_info = None
                 if message.forward:
                     forward_sender = None
@@ -217,34 +213,29 @@ async def perform_search(client, search_query, limit=50):
 
     return search_results
 
-async def perform_multi_language_search(client, search_query, languages):
+async def perform_multi_language_search(client, search_query, languages, source_language):
     all_results = []
     total_message_count = 0
     
-    # Print initial search info
     print(f"Input: {search_query}")
     
     for lang in languages:
-        if lang != 'en':  # Assuming the original query is in English
-            translated_query = translate_text(search_query, lang)
+        if lang != source_language:  # Use source language provided by user
+            translated_query = translate_text(search_query, source_language, lang)
         else:
             translated_query = search_query
         
-        # Perform the search and get matching results
         print(f"Searching for '{translated_query}'...")
         lang_results = await perform_search(client, translated_query)
         search_count = len(lang_results)
         total_message_count += search_count
         
-        # Print count of messages found per language
         print(f"Found {search_count} messages for '{translated_query}'...")
         
         all_results.extend(lang_results)
         
-        # Print completion of search for each language
         print(f"Completed search for '{translated_query}'...")
     
-    # Print the total count of messages before sending results back
     print(f"Total matching messages found: {total_message_count}")
     
     return all_results
@@ -260,6 +251,7 @@ async def search():
             request_data = await request.json
             search_query = request_data.get('q')
             languages = request_data.get('languages', ['en'])
+            source_language = request_data.get('source_language', 'en')  # Get source language from request
             page = request_data.get('page', 1)
             results_per_page = 10
 
@@ -273,7 +265,7 @@ async def search():
             api_credentials = read_credentials_from_file(api_credentials_file)
 
             async with TelegramClientContext(api_credentials['api_id'], api_credentials['api_hash']) as client:
-                search_results = await perform_multi_language_search(client, search_query, languages)
+                search_results = await perform_multi_language_search(client, search_query, languages, source_language)
 
             start_index = (page - 1) * results_per_page
             end_index = start_index + results_per_page
@@ -296,11 +288,12 @@ async def translate():
             request_data = await request.json
             text = request_data.get('text')
             target_lang = request_data.get('target_lang')
+            source_lang = request_data.get('source_lang', 'en')  # Pass source language as well
 
             if not text or not target_lang:
                 return jsonify({'error': 'Text or target language not provided'})
 
-            translated_text = translate_text(text, target_lang)
+            translated_text = translate_text(text, source_lang, target_lang)
 
             return jsonify({'translated_text': translated_text})
 
