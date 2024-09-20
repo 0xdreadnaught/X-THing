@@ -111,6 +111,10 @@ python ./x-crawler.py --config ./config.json --message-depth 100 --channel-depth
 ![image](https://github.com/user-attachments/assets/dfef95b1-e5c3-4c39-aee1-6ab9d9525bdb) 
 ![image](https://github.com/user-attachments/assets/c3774d3b-bf75-4173-a8d1-7fdffce33fa7)
 
+* #### X-THing user search:
+![image](https://github.com/user-attachments/assets/4602752a-11fb-4ef0-9ad5-4998287655c2)
+![image](https://github.com/user-attachments/assets/6338022e-409d-4f60-bf35-00c2c78c06a4)
+
 * #### X-Crawler starting a crawl:
 ![image](https://github.com/user-attachments/assets/33bc504f-5c5a-4bd9-bf01-1d43001b31a7)
 
