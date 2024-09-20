@@ -64,7 +64,20 @@ Ensure you have a `credentials.json` file in the root directory with the followi
 }
 ```
 
-Alternatively, you can pass the API credentials as flags when running the tool (not advised).
+*Alternatively, you can pass the API credentials as flags when running the tool (not advised).
+
+Update your starting channels and search terms in `config.json`:
+```
+{
+    "initial_channel_links": [
+      "https://t.me/<channel1>",
+      "https://t.me/<channel2>",
+      "https://t.me/<channeln>"
+    ],
+    "message_keywords": ["hackers", "CVE", "malware", "exploit", "etc"],
+    "batch_size": 100
+}
+```
 
 ### Running the Application
 
@@ -99,6 +112,3 @@ python ./x-crawler.py --config ./config.json --message-depth 100 --channel-depth
 
 * #### X-Crawler joining channels:
 ![image](https://github.com/user-attachments/assets/d0e9e3f6-1068-45eb-a611-747be28d9b05)
-
-
-
