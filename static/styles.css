@@ -1,0 +1,175 @@
+/* Body styling */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #2a2f35;
+    color: #eaeaea;
+}
+
+/* Container styling */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #1c1f23;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Heading styling */
+h1 {
+    text-align: center;
+    color: #00a8ff;
+}
+
+/* Form container */
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Search input styling */
+.search-input {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #2a2f35;
+    color: #eaeaea;
+    border: 1px solid #46505a;
+    border-radius: 4px;
+}
+
+/* Button styling */
+.search-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #0088cc;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.search-button:hover {
+    background-color: #007bb6;
+}
+
+/* Language options */
+.language-options {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.language-options label {
+    margin-right: 10px;
+    white-space: nowrap;
+    color: #eaeaea;
+}
+
+/* Search results styling */
+.search-results {
+    margin-top: 20px;
+}
+
+/* Message list */
+.message-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.message-list li {
+    background-color: #2a2f35;
+    border: 1px solid #46505a;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.message-list li p {
+    margin: 5px 0;
+    word-wrap: break-word;
+}
+
+/* Link Styling */
+a {
+    color: #66b2ff; /* Lighter blue for unvisited links */
+    text-decoration: none;
+}
+
+a:visited {
+    color: #d880ff; /* Brighter purple for visited links */
+}
+
+a:hover {
+    color: #00a8ff; /* Slightly brighter blue when hovering over links */
+    text-decoration: underline;
+}
+
+a:active {
+    color: #d880ff; /* Keep the active (clicked) state the same as visited */
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    background-color: #0088cc;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.pagination button:disabled {
+    background-color: #46505a;
+    cursor: not-allowed;
+}
+
+/* Page number styling */
+.page-number {
+    background-color: #0088cc;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 0 3px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.page-number.active {
+    background-color: #007bb6;
+}
+
+/* Source Language Dropdown Styling */
+#sourceLanguage {
+    margin-top: 10px;
+    padding: 8px;
+    font-size: 16px;
+    background-color: #2a2f35;
+    color: #eaeaea;
+    border: 1px solid #46505a;
+    border-radius: 4px;
+    width: auto;
+}
+
+/* Additional Tweaks for UI Elements */
+.translation-info {
+    margin: 15px 0;
+    color: #c9d1d9;
+}
