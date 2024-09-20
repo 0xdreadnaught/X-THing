@@ -24,6 +24,10 @@ Instead of one large script, things have been broken apart into more manageable 
 X-THing is actively being developed, with future enhancements planned across both **X-Crawler** and **X-Thing** modules such as send colors, suppressing harvested messages/channels, etc.
 Bug fixes are also planned, like squashing the hypercorn output on launch.
 
+## Known Issues
+
+There may be some false positives in the search results due to poor translation attempts. Things like malware names really screw with it. The search logic will be refined, hopefully adding more dynamic features... maybe even regex...
+
 ## Installation
 
 ### Prerequisites
