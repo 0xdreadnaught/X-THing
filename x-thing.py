@@ -213,28 +213,89 @@ async def perform_search(client, search_query, limit=50):
 
     return search_results
 
-async def perform_multi_language_search(client, search_query, languages, source_language):
+async def perform_user_search(client, username, limit=50):
+    search_results = []
+    user_entity = None
+    
+    try:
+        # First attempt to directly resolve the user entity
+        try:
+            user_entity = await client.get_input_entity(username)
+            user_id = user_entity.user_id
+        except Exception as e:
+            print(f"Direct resolution failed for user '{username}': {str(e)}")
+            return search_results
+            
+        # If the user is resolved, search their messages in all channels
+        if user_entity:
+            print(f"User '{username}' resolved to ID: {user_id}. Proceeding with message search...")
+
+            # Iterate over all channels/groups you're connected to
+            async for dialog in client.iter_dialogs():
+                if dialog.is_channel or dialog.is_group:
+                    print(f"Searching in {dialog.name} (ID: {dialog.id})...")
+
+                    try:
+                        # Retrieve messages without applying server-side filters (fetch all)
+                        async for message in client.iter_messages(dialog, limit=limit):
+                            if message.sender_id == user_id:
+                                sender_info = {
+                                    'id': message.sender_id,
+                                    'title': username,
+                                    'type': 'User',
+                                    'color': None
+                                }
+
+                                content = message.text or 'No content'
+
+                                search_results.append({
+                                    'message_id': message.id,
+                                    'date': str(message.date),
+                                    'sender': f"{sender_info['title']} [{sender_info['id']}]",
+                                    'sender_type': sender_info['type'],
+                                    'content': content,
+                                    'post_url': f'https://t.me/c/{str(message.chat_id)[4:]}/{message.id}' if message.chat else 'Unknown'
+                                })
+
+                    except Exception as e:
+                        print(f"Error fetching messages in {dialog.name}: {str(e)}")
+        else:
+            print(f"User '{username}' not found in any dialogs or channels.")
+            
+    except Exception as e:
+        print(f"Error in user search: {str(e)}")
+
+    return search_results
+
+async def perform_multi_language_search(client, search_query, languages, source_language, search_by_user):
     all_results = []
     total_message_count = 0
     
     print(f"Input: {search_query}")
     
-    for lang in languages:
-        if lang != source_language:  # Use source language provided by user
-            translated_query = translate_text(search_query, source_language, lang)
-        else:
-            translated_query = search_query
-        
-        print(f"Searching for '{translated_query}'...")
-        lang_results = await perform_search(client, translated_query)
-        search_count = len(lang_results)
-        total_message_count += search_count
-        
-        print(f"Found {search_count} messages for '{translated_query}'...")
-        
-        all_results.extend(lang_results)
-        
-        print(f"Completed search for '{translated_query}'...")
+    if search_by_user:
+        # Perform search by username if the flag is set
+        search_results = await perform_user_search(client, search_query)
+        total_message_count = len(search_results)
+        all_results.extend(search_results)
+    else:
+        # Otherwise, perform normal message content search
+        for lang in languages:
+            if lang != source_language:  # Use source language provided by user
+                translated_query = translate_text(search_query, source_language, lang)
+            else:
+                translated_query = search_query
+
+            print(f"Searching for '{translated_query}'...")
+            lang_results = await perform_search(client, translated_query)
+            search_count = len(lang_results)
+            total_message_count += search_count
+
+            print(f"Found {search_count} messages for '{translated_query}'...")
+
+            all_results.extend(lang_results)
+
+            print(f"Completed search for '{translated_query}'...")
     
     print(f"Total matching messages found: {total_message_count}")
     
@@ -252,6 +313,7 @@ async def search():
             search_query = request_data.get('q')
             languages = request_data.get('languages', ['en'])
             source_language = request_data.get('source_language', 'en')  # Get source language from request
+            search_by_user = request_data.get('search_by_user', False)  # Check if the search is by user
             page = request_data.get('page', 1)
             results_per_page = 10
 
@@ -265,7 +327,11 @@ async def search():
             api_credentials = read_credentials_from_file(api_credentials_file)
 
             async with TelegramClientContext(api_credentials['api_id'], api_credentials['api_hash']) as client:
-                search_results = await perform_multi_language_search(client, search_query, languages, source_language)
+                search_results = await perform_multi_language_search(client, search_query, languages, source_language, search_by_user)
+
+            # If there's an error, return it to the UI
+            if isinstance(search_results, dict) and 'error' in search_results:
+                return jsonify(search_results)
 
             start_index = (page - 1) * results_per_page
             end_index = start_index + results_per_page

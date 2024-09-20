@@ -32,12 +32,12 @@ X-THing is actively being developed, with future enhancements planned across bot
 - Get/display the sender's name color.
 - Cleanup `x-thing.py` output. (hypercorn warnings)
 - Cleanup `x-crawler.py` output. (harvested messages/channels)
-Bug fixes are also planned, like squashing the hypercorn output on launch.
+- Bug fixes.
 
 ## Bugs
 
-- When searching eng>eng it tries to translate when it shouldn't, sometimes resulting in a bad search string.
-  - Things like malware names screw with it, ex: `mispadu` becomes `mispada`.
+- ~~When searching eng>eng it tries to translate when it shouldn't, sometimes resulting in a bad search string.~~
+  - ~~Things like malware names screw with it, ex: `mispadu` becomes `mispada`.~~
 - The `--rate-limit` flag added to `x-crawler.py` doesn't seem to work below 600.
   - Default rate of operations is too much for prolonged use. Telethon should handle this but Telegram may have changed things a bit. 
 
@@ -108,7 +108,8 @@ python ./x-crawler.py --config ./config.json --message-depth 100 --channel-depth
 ![image](https://github.com/user-attachments/assets/b63c1ab7-07eb-4a32-9b3e-8b66dccd7eb9)
 
 * #### X-THing Dashboard:
-![image](https://github.com/user-attachments/assets/37a6f6da-f286-4bdf-80c0-86ccf2d74fc5)
+![image](https://github.com/user-attachments/assets/dfef95b1-e5c3-4c39-aee1-6ab9d9525bdb) 
+![image](https://github.com/user-attachments/assets/c3774d3b-bf75-4173-a8d1-7fdffce33fa7)
 
 * #### X-Crawler starting a crawl:
 ![image](https://github.com/user-attachments/assets/33bc504f-5c5a-4bd9-bf01-1d43001b31a7)

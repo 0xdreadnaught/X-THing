@@ -13,11 +13,16 @@
         <form id="searchForm" class="form-container">
             <input type="text" id="searchQuery" class="search-input" placeholder="Enter search query">
             <button type="submit" class="search-button">Search</button>
+
             <label for="sourceLanguage" class="source-language-label">Source Language:</label>
             <select id="sourceLanguage" class="source-language-select">
                 <option value="en" selected>English</option>
                 <!-- Add other source language options as needed -->
             </select>
+
+            <label for="userSearchCheckbox" class="user-search-label">Search by user:</label>
+            <input type="checkbox" id="userSearchCheckbox" />
+
             <div id="languageOptions" class="language-options">
                 <label><input type="checkbox" name="lang" value="en"> English</label>
                 <label><input type="checkbox" name="lang" value="ru"> Russian</label>

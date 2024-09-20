@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const lastPageButtonBottom = document.getElementById('lastPageButtonBottom');
     const translationInfo = document.getElementById('translationInfo');
     const totalResultsCount = document.getElementById('totalResultsCount'); // Element for total results
+    const userSearchCheckbox = document.getElementById('userSearchCheckbox'); // New checkbox for user search
 
     let currentPage = 1;
     let totalPages = 1;
@@ -115,6 +116,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function performSearch(searchQuery, languages, sourceLanguage, page = 1) {
+        const searchByUser = userSearchCheckbox.checked;  // Check if user checkbox is checked
+
         try {
             const response = await fetch('/search', {
                 method: 'POST',
@@ -125,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     q: searchQuery,
                     languages: languages,
                     source_language: sourceLanguage, // Pass the source language
+                    search_by_user: searchByUser, // Pass the user search flag
                     page: page
                 })
             });
