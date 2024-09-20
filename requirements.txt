@@ -1,0 +1,7 @@
+pandas
+nltk
+colorama
+telethon
+tqdm
+deep-translator
+quart
