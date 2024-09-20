@@ -4,6 +4,8 @@ X-THing is a Telegram hunting tool that merges functionalities from two projects
 
 **Note:** Your mileage may vary as this is a heavily bastardized version of the two projects. I have introduced an equal number of features/bugs.
 
+[![CodeQL](https://github.com/0xdreadnaught/X-THing/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/0xdreadnaught/X-THing/actions/workflows/github-code-scanning/codeql)
+
 ## Features
 
 ### Unified Telegram Hunting
