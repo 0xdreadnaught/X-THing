@@ -38,8 +38,8 @@ X-THing is actively being developed, with future enhancements planned across bot
 
 - ~~When searching eng>eng it tries to translate when it shouldn't, sometimes resulting in a bad search string.~~
   - ~~Things like malware names screw with it, ex: `mispadu` becomes `mispada`.~~
-- The `--rate-limit` flag added to `x-crawler.py` doesn't seem to work below 600.
-  - Default rate of operations is too much for prolonged use. Telethon should handle this but Telegram may have changed things a bit. 
+- ~~The `--rate-limit` flag added to `x-crawler.py` doesn't seem to work below 600.~~
+  - ~~Default rate of operations is too much for prolonged use. Telethon should handle this but Telegram may have changed things a bit.~~
 
 ## Installation
 
