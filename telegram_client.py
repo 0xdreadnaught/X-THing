@@ -79,12 +79,10 @@ class TelegramClientWrapper:
             nonlocal messages
             async for message in self.client.iter_messages(entity, limit=message_limit):
                 if message.text:
-                    if affiliated_channel:
-                        print_info(f"Message from {entity_name} <-- {affiliated_channel}: {message.text}")
-                    else:
-                        print_info(f"Message from {entity_name}: {message.text}")
+                    # No direct printing here
                     messages.append([message.sender_id, message.date, message.text, None, None])
                     
+                    # Extract links and add to channel manager
                     links = self.extract_channel_links(message.text)
                     for link in links:
                         channel_manager.add_channel(link, source_channel=entity_name)
