@@ -2,10 +2,12 @@ import asyncio
 import json
 from quart import Quart, render_template, request, jsonify
 from telethon import TelegramClient, types
-from telethon.tl.types import InputMessagesFilterEmpty
 import os
 from deep_translator import GoogleTranslator
 import logging
+import time
+from tqdm import tqdm  # Import tqdm for the progress bar
+import argparse  # Import argparse for command-line arguments
 
 app = Quart(__name__)
 
@@ -17,6 +19,40 @@ log.setLevel(logging.WARNING)
 
 logging.getLogger('hypercorn').setLevel(logging.WARNING)
 logging.getLogger('telethon').setLevel(logging.WARNING)
+
+# Rate limit will be set later after parsing arguments
+RATE_LIMIT = None  # Initialize as None
+
+class RateLimiter:
+    def __init__(self, rate_limit):
+        self.rate_limit = rate_limit
+        self.lock = asyncio.Lock()
+        self.last_call = None  # Set to None to indicate no previous call
+        self.first_operation = True  # Flag to indicate the first operation
+
+    async def acquire(self):
+        async with self.lock:
+            if self.first_operation:
+                # Skip rate limiting for the first operation
+                self.first_operation = False
+                self.last_call = time.monotonic()
+                return
+
+            current_time = time.monotonic()
+            elapsed = current_time - self.last_call
+            wait_time = self.rate_limit - elapsed
+            if wait_time > 0:
+                print(f"Applying rate limit of {wait_time:.2f} seconds before making the next API call.")
+                # Display a progress bar during the wait time
+                for _ in tqdm(range(int(wait_time)), desc="Waiting", unit="s"):
+                    await asyncio.sleep(1)
+                # Handle any remaining fractional seconds
+                fractional_wait = wait_time - int(wait_time)
+                if fractional_wait > 0:
+                    await asyncio.sleep(fractional_wait)
+            self.last_call = time.monotonic()
+
+# The RateLimiter instance will be created after parsing arguments
 
 # Function to map certain languages to their Google Translate codes
 def map_language_code(lang_code):
@@ -81,11 +117,13 @@ def translate_text(text, source_language, target_language):
 async def perform_search(client, search_query, limit=50):
     search_results = []
     try:
+        # Apply rate limiting before starting the search
+        await rate_limiter.acquire()
         async for message in client.iter_messages(entity=None, search=search_query, limit=limit):
             try:
                 if not message.text and not message.forward:  # Skip messages with no content and no forward
                     continue
-                
+
                 sender_info = {
                     'id': message.sender_id,
                     'title': 'Unknown',
@@ -216,8 +254,10 @@ async def perform_search(client, search_query, limit=50):
 async def perform_user_search(client, username, limit=50):
     search_results = []
     user_entity = None
-    
+
     try:
+        # Apply rate limiting before resolving the user entity
+        await rate_limiter.acquire()
         # First attempt to directly resolve the user entity
         try:
             user_entity = await client.get_input_entity(username)
@@ -225,7 +265,7 @@ async def perform_user_search(client, username, limit=50):
         except Exception as e:
             print(f"Direct resolution failed for user '{username}': {str(e)}")
             return search_results
-            
+
         # If the user is resolved, search their messages in all channels
         if user_entity:
             print(f"User '{username}' resolved to ID: {user_id}. Proceeding with message search...")
@@ -234,8 +274,9 @@ async def perform_user_search(client, username, limit=50):
             async for dialog in client.iter_dialogs():
                 if dialog.is_channel or dialog.is_group:
                     print(f"Searching in {dialog.name} (ID: {dialog.id})...")
-
                     try:
+                        # Apply rate limiting before fetching messages in each dialog
+                        await rate_limiter.acquire()
                         # Retrieve messages without applying server-side filters (fetch all)
                         async for message in client.iter_messages(dialog, limit=limit):
                             if message.sender_id == user_id:
@@ -261,7 +302,7 @@ async def perform_user_search(client, username, limit=50):
                         print(f"Error fetching messages in {dialog.name}: {str(e)}")
         else:
             print(f"User '{username}' not found in any dialogs or channels.")
-            
+
     except Exception as e:
         print(f"Error in user search: {str(e)}")
 
@@ -270,20 +311,20 @@ async def perform_user_search(client, username, limit=50):
 async def perform_multi_language_search(client, search_query, languages, source_language, search_by_user):
     all_results = []
     total_message_count = 0
-    
+
     print(f"Input: {search_query}")
-    
+
     if search_by_user:
-        # Perform search by username if the flag is set
+        # Remove rate limiter call here to avoid double rate limiting
         search_results = await perform_user_search(client, search_query)
         total_message_count = len(search_results)
         all_results.extend(search_results)
     else:
-        # Otherwise, perform normal message content search
+        # For each language, we don't need to apply rate limiting here
         for lang in languages:
             if lang != source_language:  # Use source language provided by user
                 translated_query = translate_text(search_query, source_language, lang)
-                
+
                 # Check if the translation resulted in an empty string
                 if not translated_query.strip():
                     print(f"Skipping search for '{search_query}' in '{display_language_code(lang)}' as it has no valid translation.")
@@ -301,9 +342,9 @@ async def perform_multi_language_search(client, search_query, languages, source_
             all_results.extend(lang_results)
 
             print(f"Completed search for '{translated_query}' in '{display_language_code(lang)}'...")
-    
+
     print(f"Total matching messages found: {total_message_count}")
-    
+
     return all_results
 
 @app.route('/')
@@ -372,4 +413,15 @@ async def translate():
             return jsonify({'error': str(e)})
 
 if __name__ == '__main__':
+    # Set up argument parsing
+    parser = argparse.ArgumentParser(description='X-Thing Web Application')
+    parser.add_argument('--rate-limit', type=float, default=1.0, help='Rate limit in seconds between API calls')
+    args = parser.parse_args()
+
+    RATE_LIMIT = args.rate_limit  # Set the rate limit from arguments
+
+    # Instantiate the rate limiter with the specified rate limit
+    rate_limiter = RateLimiter(RATE_LIMIT)
+
+    # Run the Quart app
     app.run(debug=False)
