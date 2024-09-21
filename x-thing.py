@@ -283,19 +283,24 @@ async def perform_multi_language_search(client, search_query, languages, source_
         for lang in languages:
             if lang != source_language:  # Use source language provided by user
                 translated_query = translate_text(search_query, source_language, lang)
+                
+                # Check if the translation resulted in an empty string
+                if not translated_query.strip():
+                    print(f"Skipping search for '{search_query}' in '{display_language_code(lang)}' as it has no valid translation.")
+                    continue
             else:
                 translated_query = search_query
 
-            print(f"Searching for '{translated_query}'...")
+            print(f"Searching for '{translated_query}' in '{display_language_code(lang)}'...")
             lang_results = await perform_search(client, translated_query)
             search_count = len(lang_results)
             total_message_count += search_count
 
-            print(f"Found {search_count} messages for '{translated_query}'...")
+            print(f"Found {search_count} messages for '{translated_query}' in '{display_language_code(lang)}'...")
 
             all_results.extend(lang_results)
 
-            print(f"Completed search for '{translated_query}'...")
+            print(f"Completed search for '{translated_query}' in '{display_language_code(lang)}'...")
     
     print(f"Total matching messages found: {total_message_count}")
     
