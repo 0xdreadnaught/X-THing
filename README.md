@@ -10,7 +10,7 @@ X-THing is a Telegram hunting tool that merges functionalities from two projects
 ## Features
 
 ### Unified Telegram Hunting
-Not quite yet lol. While you can leverage both scripts at the same time, the goal is the have one launch script, and have access to a dyanmic number of x-crawler instances inside the webUI. Allowing for parsing multiple tailored campaigns.
+Not quite yet lol. While you can leverage both scripts at the same time, the goal is the have one launch script, and have access to a dynamic number of x-crawler instances inside the webUI. Allowing for parsing multiple tailored campaigns.
 
 ### Multilingual Search with Google Translate
 With **Google Translation** integration, users can search for messages in multiple languages simultaneously. X-THing automatically translates search queries into the selected languages and displays unique and total matches.
@@ -21,8 +21,25 @@ The search UI now leverages ellipses pagination for smoother navigation.
 ### Debug Info
 While disabled by default, `x-thing.py` has logging in place for some background task data. Comment out the logging near the start of the script and update the main function to True.
 
-### Modular Codebase
+### Modular Codebase:
 The goal is to try and keep things pretty modular so they're easy to maintain/customize.
+
+- **x-crawler.py**: Responsible for crawling Telegram channels based on the defined configuration, searching for messages matching keywords, and handling channel traversal.
+- **x-thing.py**: The main entry point of the application, which hosts the dashboard interface, processes search requests, and interacts with other modules.
+- **batch_processor.py**: Manages batch processing of messages, handles sentiment analysis, saves batches to CSV files, and generates a final report from the aggregated messages using a sentiment analyzer.
+- **channel_manager.py**: Manages discovered, joined, and processed channels. Tracks affiliations between channels and manages the list of channels yet to be processed.
+- **config.json**: Stores initial configuration parameters, such as starting channels, search terms, and batch size for message retrieval.
+- **config.py**: Handles configuration loading and creation. Provides functions to load an existing config or create a default one if none exists.
+- **message_processor.py**: Contains a custom cybersecurity sentiment analyzer based on the NLTK sentiment intensity analyzer. It extends the analyzer with a cybersecurity lexicon to evaluate the sentiment of messages in a cybersecurity context.
+- **report_generator.py**: Generates a detailed sentiment analysis report from a DataFrame of messages, including sentiment categorization and scoring. It outputs the report to both a text file and the console.
+- **telegram_client.py**: Implements a wrapper around the Telethon Telegram client. It manages joining channels, scraping messages, handling flood control, and parsing channel links.
+- **transcheck.py**: Provides functionality to translate English text to German using the Google Translator library. Includes a simple interactive translation loop for command-line usage.
+- **utils.py**: Contains various utility functions for colored console printing, displaying banners, and ensuring NLTK data availability. Also includes functions for categorized sentiment coloring.
+- **static/**: Contains static assets for the web interface.
+  - **script.js**: Manages the frontend behavior and interactions of the X-THing dashboard.
+  - **styles.css**: Defines the styling for the X-THing web interface.
+- **templates/**: Contains HTML templates used by the web interface.
+  - **index.html**: The main template for the X-THing dashboard.
 
 ## Planned Features
 
