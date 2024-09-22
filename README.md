@@ -87,7 +87,11 @@ Update your starting channels and search terms in `config.json`:
 To launch the **X-THing** interface:
 
 ```
+#full send
 python x-thing.py
+
+#rate limited (5s/req)
+python x-thing.py --rate-limit 5
 ```
 
 For **X-Crawler** functionality, run:
@@ -105,7 +109,7 @@ python ./x-crawler.py --config ./config.json --message-depth 100 --channel-depth
 ### Runtime
 
 * #### X-THing hosting the dashboard and processing search requests:
-![image](https://github.com/user-attachments/assets/b63c1ab7-07eb-4a32-9b3e-8b66dccd7eb9)
+![image](https://github.com/user-attachments/assets/a151f474-ada1-49ca-8fff-5da2ab45a477)
 
 * #### X-THing Dashboard:
 ![image](https://github.com/user-attachments/assets/dfef95b1-e5c3-4c39-aee1-6ab9d9525bdb) 
